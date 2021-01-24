@@ -1,4 +1,4 @@
-# 中国滑稽大学(University of Ridiculous of China)健康打卡平台自动打卡脚本
+# 中国滑稽大学(University of Ridiculous of China)健康打卡平台自动打卡脚本22
 
 ![Auto-report action](https://github.com/Violin9906/USTC-ncov-AutoReport/workflows/Auto-report%20action/badge.svg?branch=master&event=schedule)
 ![School](https://img.shields.io/badge/School-URC-blue.svg)
