@@ -9,6 +9,7 @@ import sys
 import argparse
 from bs4 import BeautifulSoup
 
+
 class Report(object):
     def __init__(self, stuid, password, data_path):
         self.stuid = stuid
@@ -24,6 +25,7 @@ class Report(object):
             getform = session.get("https://weixine.ustc.edu.cn/2020")
             retrycount = retrycount - 1
             if getform.url != "https://weixine.ustc.edu.cn/2020/home":
+                print(getform.url)
                 print("Login Failed! Retrying...")
             else:
                 print("Login Successful!")
@@ -31,14 +33,14 @@ class Report(object):
         if not loginsuccess:
             return False
         data = getform.text
-        data = data.encode('ascii','ignore').decode('utf-8','ignore')
+        data = data.encode('ascii', 'ignore').decode('utf-8', 'ignore')
         soup = BeautifulSoup(data, 'html.parser')
         token = soup.find("input", {"name": "_token"})['value']
 
         with open(self.data_path, "r+") as f:
             data = f.read()
             data = json.loads(data)
-            data["_token"]=token
+            data["_token"] = token
 
         headers = {
             'authority': 'weixine.ustc.edu.cn',
@@ -50,11 +52,12 @@ class Report(object):
             'referer': 'https://weixine.ustc.edu.cn/2020/home',
             'accept-language': 'zh-CN,zh;q=0.9',
             'Connection': 'close',
-            'cookie': "PHPSESSID=" + cookies.get("PHPSESSID") + ";XSRF-TOKEN=" + cookies.get("XSRF-TOKEN") + ";laravel_session="+cookies.get("laravel_session"),
+            'cookie': "PHPSESSID=" + cookies.get("PHPSESSID") + ";XSRF-TOKEN=" + cookies.get(
+                "XSRF-TOKEN") + ";laravel_session=" + cookies.get("laravel_session"),
         }
 
         url = "https://weixine.ustc.edu.cn/2020/daliy_report"
-        resp=session.post(url, data=data, headers=headers)
+        resp = session.post(url, data=data, headers=headers)
         data = session.get("https://weixine.ustc.edu.cn/2020").text
         soup = BeautifulSoup(data, 'html.parser')
         pattern = re.compile("202[0-9]-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}")
@@ -66,12 +69,12 @@ class Report(object):
             print("Latest report: " + date)
             date = date + " +0800"
             reporttime = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S %z")
-            timenow = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
+            timenow = datetime.datetime.now(pytz.timezone('Asia/Shanghai')).strptime(date, "%Y-%m-%d %H:%M:%S %z")
             delta = timenow - reporttime
             print("{} second(s) before.".format(delta.seconds))
             if delta.seconds < 120:
                 flag = True
-        if flag == False:
+        if not flag:
             print("Report FAILED!")
         else:
             print("Report SUCCESSFUL!")
@@ -84,6 +87,9 @@ class Report(object):
             'service': 'https://weixine.ustc.edu.cn/2020/caslogin',
             'username': self.stuid,
             'password': str(self.password),
+            'warn': '',
+            'showCode': '',
+            'button': '',
         }
         session = requests.Session()
         session.post(url, data=data)
@@ -102,7 +108,7 @@ if __name__ == "__main__":
     count = 5
     while count != 0:
         ret = autorepoter.report()
-        if ret != False:
+        if ret:
             break
         print("Report Failed, retry...")
         count = count - 1
